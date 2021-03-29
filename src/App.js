@@ -7,11 +7,27 @@ const Person = ({ person }) => {
   )
 }
 
+const Notification = ({ message }) => {
+  if (message.message === null) {
+    return null
+  }
+  let classTag = "message"
+  if (message.error === true) {
+    classTag = "error message"
+  }
+  return (
+    <div className={classTag}>
+      {message.message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ filterValue, setFilterValue ] = useState('')
+  const [ errorMessage, setErrorMessage ] = useState({message: null})
 
   useEffect(() => {
     personService
@@ -37,6 +53,24 @@ const App = () => {
                 setPersons(persons.map(personArr => personArr.id !== person.id ? personArr : updatedName))
                 setNewName('')
                 setNewNumber('')
+                setErrorMessage({
+                  error: false,
+                  message: `Updated ${updatedName.name}` 
+                }
+                )
+                setTimeout(() => {
+                  setErrorMessage({message: null})
+                }, 5000)
+              })
+              .catch(err => {
+                setErrorMessage({
+                  error: true,
+                  message: `${person.name} was already deleted from the server` 
+                }
+                )
+                setTimeout(() => {
+                  setErrorMessage({message: null})
+                }, 5000)
               })
             return
         } else {
@@ -50,6 +84,14 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
+        setErrorMessage({
+          error: false,
+          message: `Added ${returnedPerson.name}` 
+        }
+        )
+        setTimeout(() => {
+          setErrorMessage({message: null})
+        }, 5000)
       })
   }
 
@@ -80,6 +122,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} />
       <div>
         filter: <input onChange={handleFilterChange} />
       </div>
